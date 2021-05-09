@@ -21,6 +21,8 @@ namespace plasma_effect
 
         private RandomMovingPoint _movingPoint;
 
+        private Random _random;
+
         public VoronoiEffect()
         {
             this.Window.AllowUserResizing = true;
@@ -35,13 +37,24 @@ namespace plasma_effect
             this.Window.Title = Config.WINDOW_TITLE;
 
             this._engine = new VoronoiEngine();
+            this._random = new Random();
             this._movingPoint = new RandomMovingPoint();
-            this._points = new List<VoronoiPoint>
+            this._points = new List<VoronoiPoint>();
+            for(var i = 0; i < 20; i++)
             {
-                new VoronoiPoint { Point = new Point{ X = 0, Y = 0}, Color = Color.Blue },
-                new VoronoiPoint { Point = new Point{ X = GraphicsDevice.Viewport.Bounds.Width/2, Y = GraphicsDevice.Viewport.Bounds.Height/2}, Color = Color.LightBlue },
-                new VoronoiPoint { Point = new Point{ X = GraphicsDevice.Viewport.Bounds.Width, Y = GraphicsDevice.Viewport.Bounds.Height}, Color = Color.DarkBlue }
-            };
+                this._points.Add(new VoronoiPoint
+                {
+                    Color = new Color(
+                        this._random.Next(0, 255),
+                        this._random.Next(0, 255),
+                        this._random.Next(0, 255)
+                    ),
+                    Point = new Point {
+                        X = this._random.Next(0,GraphicsDevice.Viewport.Width),
+                        Y = this._random.Next(0, GraphicsDevice.Viewport.Height)
+                    }
+                });
+            }
 
             base.Initialize();
         }
@@ -74,7 +87,7 @@ namespace plasma_effect
             GraphicsDevice.Clear(Color.CornflowerBlue);
             this._spriteBatch.Begin();
 
-            //draw plasma
+            //draw voronoi
             this._spriteBatch.Draw(this._voronoi, new Vector2(0, 0), Color.White);
 
             //draw point

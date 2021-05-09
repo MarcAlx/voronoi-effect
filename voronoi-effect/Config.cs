@@ -21,11 +21,11 @@ namespace plasmaeffect
         /// <summary>
         /// FPS cap
         /// </summary>
-        public static readonly int FPS_CAP = 60;
+        public static readonly int FPS_CAP = 30;
 
         /// <summary>
         /// Pixel ratio
         /// </summary>
-        public static readonly int PIXEL_RATIO = 5;
+        public static readonly int PIXEL_RATIO = 10;
     }
 }
