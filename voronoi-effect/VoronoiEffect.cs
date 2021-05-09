@@ -17,12 +17,6 @@ namespace plasma_effect
         private Texture2D _voronoi;
         private VoronoiEngine _engine;
 
-        private List<VoronoiPoint> _points;
-
-        private RandomMovingPoint _movingPoint;
-
-        private Random _random;
-
         public VoronoiEffect()
         {
             this.Window.AllowUserResizing = true;
@@ -36,25 +30,7 @@ namespace plasma_effect
         {
             this.Window.Title = Config.WINDOW_TITLE;
 
-            this._engine = new VoronoiEngine();
-            this._random = new Random();
-            this._movingPoint = new RandomMovingPoint();
-            this._points = new List<VoronoiPoint>();
-            for(var i = 0; i < 20; i++)
-            {
-                this._points.Add(new VoronoiPoint
-                {
-                    Color = new Color(
-                        this._random.Next(0, 255),
-                        this._random.Next(0, 255),
-                        this._random.Next(0, 255)
-                    ),
-                    Point = new Point {
-                        X = this._random.Next(0,GraphicsDevice.Viewport.Width),
-                        Y = this._random.Next(0, GraphicsDevice.Viewport.Height)
-                    }
-                });
-            }
+            this._engine = new VoronoiEngine(20);
 
             base.Initialize();
         }
@@ -71,12 +47,10 @@ namespace plasma_effect
                 Exit();
 
             //update voronoi
-            this._voronoi = this._engine.GenerateVoronoi(
+            this._voronoi = this._engine.UpdateVoronoi(
                 GraphicsDevice,
                 GraphicsDevice.Viewport.Bounds.Width,
                 GraphicsDevice.Viewport.Bounds.Height,
-                this._points,
-                ColorRampEnum.GRAY_SCALE,
                 Config.PIXEL_RATIO
             );
             base.Update(gameTime);
@@ -93,7 +67,7 @@ namespace plasma_effect
             //draw point
             if (Config.DRAW_POINTS)
             {
-                foreach(var point in this._points)
+                foreach(var point in this._engine.Points)
                 {
                     Texture2D rect = new Texture2D(GraphicsDevice, 3,3);
                     Color[] data = new Color[9];
@@ -102,7 +76,8 @@ namespace plasma_effect
                         data[i] = Color.Black;
                     }
                     rect.SetData(data);
-                    this._spriteBatch.Draw(rect, new Vector2(point.Point.X-1, point.Point.Y-1), Color.White);
+                    var p = point.GetAbsolutePoint(GraphicsDevice.Viewport.Bounds.Width,GraphicsDevice.Viewport.Bounds.Height);
+                    this._spriteBatch.Draw(rect, new Vector2(p.X-1, p.Y-1), Color.White);
                 }
             }
 

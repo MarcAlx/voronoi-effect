@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,22 +12,83 @@ namespace plasmaeffect.Engine
         RAINBOW
     }
 
+    /// <summary>
+    /// Represents a point (and the color of its area)
+    /// </summary>
     public class VoronoiPoint
     {
+        /// <summary>
+        /// Color of the point
+        /// </summary>
         public Color Color { get; set; }
 
-        public Point Point { get; set; }
+        /// <summary>
+        /// Coordinate are relative to adapt to screen size
+        /// </summary>
+        public Vector2 RelativeCoordinate { get; set; }
+
+        /// <summary>
+        /// Get real coordinate of point
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        public Point GetAbsolutePoint(int width, int height)
+        {
+            return new Point(
+                (int)Math.Round(this.RelativeCoordinate.X * width),
+                (int)Math.Round(this.RelativeCoordinate.Y * height));
+        }
     }
 
     public class VoronoiEngine
     {
         private Dictionary<ColorRampEnum, Color[]> _colorRamp;
 
-        public VoronoiEngine()
+        private List<VoronoiPoint> _points;
+
+        private Random _random;
+
+        private VoronoiEngine()
         {
             this._colorRamp = new Dictionary<ColorRampEnum, Color[]>();
             this._colorRamp[ColorRampEnum.GRAY_SCALE] = this.GenerateColorRamp(ColorRampEnum.GRAY_SCALE);
             this._colorRamp[ColorRampEnum.RAINBOW] = this.GenerateColorRamp(ColorRampEnum.RAINBOW);
+            this._points = new List<VoronoiPoint>();
+            this._random = new Random();
+        }
+
+        /// <summary>
+        /// Init a new Voronoi engine
+        /// </summary>
+        /// <param name="nbOfPoints"></param>
+        public VoronoiEngine(int nbOfPoints) : this()
+        {
+            for (var i = 0; i < nbOfPoints; i++)
+            {
+                this._points.Add(new VoronoiPoint
+                {
+                    Color = new Color(
+                        this._random.Next(0, 255),
+                        this._random.Next(0, 255),
+                        this._random.Next(0, 255)
+                    ),
+                    RelativeCoordinate = new Vector2
+                    {
+                        X = this._random.Next(0, 100) / 100.0f,
+                        Y = this._random.Next(0, 100) / 100.0f
+                    }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Init a new VoronoiEngine with a list of points
+        /// </summary>
+        /// <param name="points"></param>
+        public VoronoiEngine(List<VoronoiPoint> points)
+        {
+            this._points = points;
         }
 
         /// <summary>
@@ -63,9 +125,9 @@ namespace plasmaeffect.Engine
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        private double DistanceBetween(Point a, Point b)
+        private double DistanceBetween(float x1,float y1, float x2, float y2)
         {
-            return Math.Pow((b.X - a.X), 2) + Math.Pow((b.Y - a.Y), 2);
+            return Math.Pow((x2 - x1), 2) + Math.Pow((y2 - y1), 2);
         }
 
         /// <summary>
@@ -74,15 +136,21 @@ namespace plasmaeffect.Engine
         /// <param name="fromPoints"></param>
         /// <param name="at"></param>
         /// <returns></returns>
-        private VoronoiPoint GetClosestPoint(List<VoronoiPoint> fromPoints, Point at)
+        private VoronoiPoint GetClosestPoint(List<VoronoiPoint> fromPoints, Point at,int inWidth, int inHeight)
         {
-            return fromPoints.OrderBy(vPoint =>  DistanceBetween(vPoint.Point,at)).First();
+            return fromPoints.OrderBy(vPoint => {
+                return DistanceBetween(
+                    vPoint.RelativeCoordinate.X * inWidth,
+                    vPoint.RelativeCoordinate.Y * inHeight,
+                    at.X,
+                    at.Y);
+            }).First();
         }
 
         /// <summary>
         /// Generate plasma effect on a device (as a Texture2D) with given width and height
         /// <returns></returns>
-        public Texture2D GenerateVoronoi(GraphicsDevice device,int width,int height, List<VoronoiPoint> points, ColorRampEnum colorRamp = ColorRampEnum.GRAY_SCALE, int ratio = 50)
+        public Texture2D UpdateVoronoi(GraphicsDevice device,int width,int height,int ratio = 50)
         {
             Texture2D rect = new Texture2D(device, width, height);
 
@@ -94,7 +162,7 @@ namespace plasmaeffect.Engine
                 var topA = Math.Min(x + stepX, width);
                 for (int y = 0; y < height;y+=stepY)
                 {
-                    var closestPoint = this.GetClosestPoint(points, new Point(x, y));
+                    var closestPoint = this.GetClosestPoint(this._points, new Point(x, y),width,height);
                     var topB = Math.Min(y + stepY, height);
                     for (int a = x; a < topA; ++a)
                     {
@@ -109,6 +177,17 @@ namespace plasmaeffect.Engine
             rect.SetData(data);
 
             return rect;
+        }
+
+        /// <summary>
+        /// Return points as readonly
+        /// </summary>
+        public IReadOnlyList<VoronoiPoint> Points
+        {
+            get
+            {
+                return new ReadOnlyCollection<VoronoiPoint>(this._points);
+            }
         }
     }
 }
