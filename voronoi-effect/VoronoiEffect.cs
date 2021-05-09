@@ -30,7 +30,7 @@ namespace plasma_effect
         {
             this.Window.Title = Config.WINDOW_TITLE;
 
-            this._engine = new VoronoiEngine(20, ColorRampEnum.OCEAN, ApplyColorDirectionEnum.HORIZONTAL);
+            this._engine = new VoronoiEngine(20, ColorRampEnum.RAINBOW, ApplyColorDirectionEnum.HORIZONTAL);
 
             base.Initialize();
         }
