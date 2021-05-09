@@ -91,14 +91,14 @@ namespace plasmaeffect.Engine
             var stepY = ratio;
             for (int x = 0; x < width;x+=stepX)
             {
+                var topA = Math.Min(x + stepX, width);
                 for (int y = 0; y < height;y+=stepY)
                 {
                     var closestPoint = this.GetClosestPoint(points, new Point(x, y));
-                    var topA = Math.Min(x + stepX, width);
                     var topB = Math.Min(y + stepY, height);
-                    for (int a = x; a < topA; a++)
+                    for (int a = x; a < topA; ++a)
                     {
-                        for (int b = y; b < topB; b++)
+                        for (int b = y; b < topB; ++b)
                         {
                             data[((b) * width) + (a)] = closestPoint.Color;
                         }
