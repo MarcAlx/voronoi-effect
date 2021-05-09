@@ -30,7 +30,7 @@ namespace plasma_effect
         {
             this.Window.Title = Config.WINDOW_TITLE;
 
-            this._engine = new VoronoiEngine(20, ColorRampEnum.RAINBOW, ApplyColorDirectionEnum.HORIZONTAL);
+            this._engine = new VoronoiEngine(20, ColorRampEnum.OCEAN, ApplyColorDirectionEnum.HORIZONTAL);
 
             base.Initialize();
         }
@@ -41,17 +41,30 @@ namespace plasma_effect
             _defaultFont = Content.Load<SpriteFont>("Default");
         }
 
+        private double timer = Config.MOVE_FREQUENCY;
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            timer -= gameTime.ElapsedGameTime.TotalMilliseconds;
+            bool move = false;
+            if (timer < 0)
+            {
+                move = true;
+                timer = Config.MOVE_FREQUENCY;
+            }
 
             //update voronoi
             this._voronoi = this._engine.UpdateVoronoi(
                 GraphicsDevice,
                 GraphicsDevice.Viewport.Bounds.Width,
                 GraphicsDevice.Viewport.Bounds.Height,
-                Config.PIXEL_RATIO
+                Config.PIXEL_RATIO,
+                move,
+                Config.POINT_RELATIVE_SPEED,
+                Config.POINT_MOVE_RELATIVE_AMPLITUDE
             );
             base.Update(gameTime);
         }

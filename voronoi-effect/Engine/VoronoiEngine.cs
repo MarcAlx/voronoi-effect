@@ -68,10 +68,26 @@ namespace plasmaeffect.Engine
         /// </summary>
         public Color Color { get; set; }
 
+        public Vector2 _InitialCoordinates { get; set; }
         /// <summary>
         /// Coordinate are relative to adapt to screen size
         /// </summary>
-        public Vector2 RelativeCoordinate { get; set; }
+        public Vector2 InitialCoordinates {
+            get
+            {
+                return this._InitialCoordinates;
+            }
+            set
+            {
+                this._InitialCoordinates = value;
+                this.RelativeCoordinates = value;
+            }
+        }
+
+        /// <summary>
+        /// Coordinate are relative to adapt to screen size
+        /// </summary>
+        public Vector2 RelativeCoordinates { get; set; }
 
         /// <summary>
         /// Get real coordinate of point
@@ -82,8 +98,30 @@ namespace plasmaeffect.Engine
         public Point GetAbsolutePoint(int width, int height)
         {
             return new Point(
-                (int)Math.Round(this.RelativeCoordinate.X * width),
-                (int)Math.Round(this.RelativeCoordinate.Y * height));
+                (int)Math.Round(this.RelativeCoordinates.X * width),
+                (int)Math.Round(this.RelativeCoordinates.Y * height));
+        }
+
+        private RandomMovingPoint _rp;
+
+        public VoronoiPoint()
+        {
+            this._rp = new RandomMovingPoint();
+        }
+
+        /// <summary>
+        /// Update position
+        /// </summary>
+        public void UpdatePosition(double speed, double amplitude)
+        {
+            this._rp.UpdatePosition(
+                speed,
+                this.InitialCoordinates.X - amplitude,
+                this.InitialCoordinates.Y - amplitude,
+                this.InitialCoordinates.X + amplitude,
+                this.InitialCoordinates.Y + amplitude
+            );
+            this.RelativeCoordinates = this._rp.Position;
         }
     }
 
@@ -110,7 +148,7 @@ namespace plasmaeffect.Engine
                 this._points.Add(new VoronoiPoint
                 {
                     Color = Color.Black,
-                    RelativeCoordinate = new Vector2
+                    InitialCoordinates = new Vector2
                     {
                         X = this._random.Next(0, 100) / 100.0f,
                         Y = this._random.Next(0, 100) / 100.0f
@@ -140,11 +178,11 @@ namespace plasmaeffect.Engine
             var pointCount = this._points.Count;
             if(colorDirection == ApplyColorDirectionEnum.HORIZONTAL)
             {
-                this._points.Sort((a, b) => a.RelativeCoordinate.X.CompareTo(b.RelativeCoordinate.X));
+                this._points.Sort((a, b) => a.RelativeCoordinates.X.CompareTo(b.RelativeCoordinates.X));
             }
             else if (colorDirection == ApplyColorDirectionEnum.VERTICAL)
             {
-                this._points.Sort((a, b) => a.RelativeCoordinate.Y.CompareTo(b.RelativeCoordinate.Y));
+                this._points.Sort((a, b) => a.RelativeCoordinates.Y.CompareTo(b.RelativeCoordinates.Y));
             }
 
             if (ramp == ColorRampEnum.GRAY_SCALE)
@@ -212,19 +250,28 @@ namespace plasmaeffect.Engine
         {
             return fromPoints.OrderBy(vPoint => {
                 return DistanceBetween(
-                    vPoint.RelativeCoordinate.X * inWidth,
-                    vPoint.RelativeCoordinate.Y * inHeight,
+                    vPoint.RelativeCoordinates.X * inWidth,
+                    vPoint.RelativeCoordinates.Y * inHeight,
                     at.X,
                     at.Y);
             }).First();
         }
 
         /// <summary>
-        /// Generate plasma effect on a device (as a Texture2D) with given width and height
+        /// Generate voronoie effect on a device (as a Texture2D)
         /// <returns></returns>
-        public Texture2D UpdateVoronoi(GraphicsDevice device,int width,int height,int ratio = 50)
+        public Texture2D UpdateVoronoi(GraphicsDevice device,int width,int height,int ratio = 50, bool updatePoint = false, double pointRelativeSpeed = 0.1, double pointRelativeAmplitude = 0.1)
         {
             Texture2D rect = new Texture2D(device, width, height);
+
+            if (updatePoint)
+            {
+                foreach (var vp in this._points)
+                {
+                    var p = vp.GetAbsolutePoint(width, height);
+                    vp.UpdatePosition(pointRelativeSpeed, pointRelativeAmplitude);
+                }
+            }
 
             Color[] data = new Color[width * height];
             var stepX = ratio;
