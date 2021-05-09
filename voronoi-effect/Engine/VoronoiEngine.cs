@@ -27,6 +27,11 @@ namespace plasmaeffect.Engine
         OCEAN,
 
         /// <summary>
+        /// Equally distributed red scale
+        /// </summary>
+        LAVA,
+
+        /// <summary>
         /// Random
         /// </summary>
         RANDOM
@@ -159,19 +164,18 @@ namespace plasmaeffect.Engine
             }
             else if (ramp == ColorRampEnum.OCEAN)
             {
-                int rMax = Color.White.R;
-                int rMin = Color.Blue.R;
-                int gMax = Color.White.G;
-                int gMin = Color.Blue.G;
-                int bMax = Color.White.B;
-                int bMin = Color.Blue.B;
-                var size = this._points.Count;
-                for (int i = 0; i < size; i++)
+                var colors = Toolkit.GenerateRampBetween(Color.Blue, Color.White, this._points.Count);
+                for (int i = 0; i < this._points.Count; i++)
                 {
-                    var rAverage = rMin + (int)((rMax - rMin) * i / size);
-                    var gAverage = gMin + (int)((gMax - gMin) * i / size);
-                    var bAverage = bMin + (int)((bMax - bMin) * i / size);
-                    this._points[i].Color = new Color(rAverage, gAverage, bAverage);
+                    this._points[i].Color = colors[i];
+                }
+            }
+            else if (ramp == ColorRampEnum.LAVA)
+            {
+                var colors = Toolkit.GenerateRampBetween(Color.Yellow, Color.Red, this._points.Count);
+                for (int i = 0; i < this._points.Count; i++)
+                {
+                    this._points[i].Color = colors[i];
                 }
             }
             else if (ramp == ColorRampEnum.RANDOM)

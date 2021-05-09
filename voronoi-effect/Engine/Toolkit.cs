@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -69,6 +70,34 @@ namespace plasmaeffect.Engine
         public static double ConvertToRadians(double angle)
         {
             return (Math.PI / 180) * angle;
+        }
+
+        /// <summary>
+        /// Generate a color ramp of nb color between from and to
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="step"></param>
+        /// <returns></returns>
+        public static List<Color> GenerateRampBetween(Color from, Color to, int nb)
+        {
+            int rMin = from.R;
+            int gMin = from.G;
+            int bMin = from.B;
+
+            int rMax = to.R;
+            int gMax = to.G;
+            int bMax = to.B;
+            var size = nb;
+            var res = new List<Color>(nb);
+            for (int i = 0; i < size; i++)
+            {
+                var rAverage = rMin + (int)((rMax - rMin) * i / size);
+                var gAverage = gMin + (int)((gMax - gMin) * i / size);
+                var bAverage = bMin + (int)((bMax - bMin) * i / size);
+                res.Add(new Color(rAverage, gAverage, bAverage));
+            }
+            return res;
         }
     }
 }
