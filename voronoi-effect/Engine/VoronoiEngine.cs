@@ -32,6 +32,11 @@ namespace plasmaeffect.Engine
         LAVA,
 
         /// <summary>
+        /// Equally distributed dark green scale
+        /// </summary>
+        DARK_LEAF,
+
+        /// <summary>
         /// Random
         /// </summary>
         RANDOM
@@ -203,6 +208,14 @@ namespace plasmaeffect.Engine
             else if (ramp == ColorRampEnum.OCEAN)
             {
                 var colors = Toolkit.GenerateRampBetween(Color.Blue, Color.White, this._points.Count);
+                for (int i = 0; i < this._points.Count; i++)
+                {
+                    this._points[i].Color = colors[i];
+                }
+            }
+            else if (ramp == ColorRampEnum.DARK_LEAF)
+            {
+                var colors = Toolkit.GenerateRampBetween(Color.Green, Color.Black, this._points.Count);
                 for (int i = 0; i < this._points.Count; i++)
                 {
                     this._points[i].Color = colors[i];
