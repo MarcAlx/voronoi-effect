@@ -2,6 +2,8 @@
 
 Voronoi effect created in MonoGame
 
+![](./doc/sample.png)
+
 ## Getting started
 
 Open `.sln` in Visual Studio.

@@ -11,7 +11,7 @@ namespace plasmaeffect
         /// <summary>
         /// Tells if FPS should be displayed on screen
         /// </summary>
-        public static readonly bool DISPLAY_FPS = true;
+        public static readonly bool DISPLAY_FPS = false;
 
         /// <summary>
         /// Tells if points should be drawn
