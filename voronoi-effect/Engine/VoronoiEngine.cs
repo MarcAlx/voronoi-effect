@@ -7,10 +7,45 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace plasmaeffect.Engine
 {
+    /// <summary>
+    /// Color ramp to use
+    /// </summary>
     public enum ColorRampEnum {
+        /// <summary>
+        /// Equally distributed gray scale
+        /// </summary>
         GRAY_SCALE,
+
+        /// <summary>
+        /// Equally distributed along rainbow
+        /// </summary>
         RAINBOW,
+
+        /// <summary>
+        /// Random
+        /// </summary>
         RANDOM
+    }
+
+    /// <summary>
+    /// Direction in which the color ramp is applied
+    /// </summary>
+    public enum ApplyColorDirectionEnum
+    {
+        /// <summary>
+        /// Along X axis of point
+        /// </summary>
+        HORIZONTAL,
+
+        /// <summary>
+        /// Along Y axis of poitn
+        /// </summary>
+        VERTICAL,
+
+        /// <summary>
+        /// No direction is applied
+        /// </summary>
+        NONE
     }
 
     /// <summary>
@@ -58,7 +93,7 @@ namespace plasmaeffect.Engine
         /// Init a new Voronoi engine
         /// </summary>
         /// <param name="nbOfPoints"></param>
-        public VoronoiEngine(int nbOfPoints, ColorRampEnum colorRamp = ColorRampEnum.RAINBOW) : this()
+        public VoronoiEngine(int nbOfPoints, ColorRampEnum colorRamp = ColorRampEnum.RAINBOW, ApplyColorDirectionEnum colorDirection = ApplyColorDirectionEnum.NONE) : this()
         {
             for (var i = 0; i < nbOfPoints; i++)
             {
@@ -72,17 +107,17 @@ namespace plasmaeffect.Engine
                     }
                 });
             }
-            this.ApplyColorRamp(colorRamp);
+            this.ApplyColorRamp(colorRamp, colorDirection);
         }
 
         /// <summary>
         /// Init a new VoronoiEngine with a list of points
         /// </summary>
         /// <param name="points"></param>
-        public VoronoiEngine(List<VoronoiPoint> points, ColorRampEnum colorRamp = ColorRampEnum.RAINBOW)
+        public VoronoiEngine(List<VoronoiPoint> points, ColorRampEnum colorRamp = ColorRampEnum.RAINBOW, ApplyColorDirectionEnum colorDirection = ApplyColorDirectionEnum.NONE)
         {
             this._points = points;
-            this.ApplyColorRamp(colorRamp);
+            this.ApplyColorRamp(colorRamp, colorDirection);
         }
 
         /// <summary>
@@ -90,9 +125,18 @@ namespace plasmaeffect.Engine
         /// </summary>
         /// <param name="ramp"></param>
         /// <returns></returns>
-        private void ApplyColorRamp(ColorRampEnum ramp)
+        private void ApplyColorRamp(ColorRampEnum ramp, ApplyColorDirectionEnum colorDirection = ApplyColorDirectionEnum.NONE)
         {
             var pointCount = this._points.Count;
+            if(colorDirection == ApplyColorDirectionEnum.HORIZONTAL)
+            {
+                this._points.Sort((a, b) => a.RelativeCoordinate.X.CompareTo(b.RelativeCoordinate.X));
+            }
+            else if (colorDirection == ApplyColorDirectionEnum.VERTICAL)
+            {
+                this._points.Sort((a, b) => a.RelativeCoordinate.Y.CompareTo(b.RelativeCoordinate.Y));
+            }
+
             if (ramp == ColorRampEnum.GRAY_SCALE)
             {
                 for(int i = 0; i< pointCount; i++)
