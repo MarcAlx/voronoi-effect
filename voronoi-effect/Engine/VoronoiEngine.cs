@@ -9,7 +9,8 @@ namespace plasmaeffect.Engine
 {
     public enum ColorRampEnum {
         GRAY_SCALE,
-        RAINBOW
+        RAINBOW,
+        RANDOM
     }
 
     /// <summary>
@@ -43,17 +44,12 @@ namespace plasmaeffect.Engine
 
     public class VoronoiEngine
     {
-        private Dictionary<ColorRampEnum, Color[]> _colorRamp;
-
         private List<VoronoiPoint> _points;
 
         private Random _random;
 
         private VoronoiEngine()
         {
-            this._colorRamp = new Dictionary<ColorRampEnum, Color[]>();
-            this._colorRamp[ColorRampEnum.GRAY_SCALE] = this.GenerateColorRamp(ColorRampEnum.GRAY_SCALE);
-            this._colorRamp[ColorRampEnum.RAINBOW] = this.GenerateColorRamp(ColorRampEnum.RAINBOW);
             this._points = new List<VoronoiPoint>();
             this._random = new Random();
         }
@@ -62,17 +58,13 @@ namespace plasmaeffect.Engine
         /// Init a new Voronoi engine
         /// </summary>
         /// <param name="nbOfPoints"></param>
-        public VoronoiEngine(int nbOfPoints) : this()
+        public VoronoiEngine(int nbOfPoints, ColorRampEnum colorRamp = ColorRampEnum.RAINBOW) : this()
         {
             for (var i = 0; i < nbOfPoints; i++)
             {
                 this._points.Add(new VoronoiPoint
                 {
-                    Color = new Color(
-                        this._random.Next(0, 255),
-                        this._random.Next(0, 255),
-                        this._random.Next(0, 255)
-                    ),
+                    Color = Color.Black,
                     RelativeCoordinate = new Vector2
                     {
                         X = this._random.Next(0, 100) / 100.0f,
@@ -80,43 +72,53 @@ namespace plasmaeffect.Engine
                     }
                 });
             }
+            this.ApplyColorRamp(colorRamp);
         }
 
         /// <summary>
         /// Init a new VoronoiEngine with a list of points
         /// </summary>
         /// <param name="points"></param>
-        public VoronoiEngine(List<VoronoiPoint> points)
+        public VoronoiEngine(List<VoronoiPoint> points, ColorRampEnum colorRamp = ColorRampEnum.RAINBOW)
         {
             this._points = points;
+            this.ApplyColorRamp(colorRamp);
         }
 
         /// <summary>
-        /// Generate a color ramp according to provided enum
+        /// Apply a color ramp according to provided enum
         /// </summary>
         /// <param name="ramp"></param>
         /// <returns></returns>
-        private Color[] GenerateColorRamp(ColorRampEnum ramp)
+        private void ApplyColorRamp(ColorRampEnum ramp)
         {
-            Color[] res = new Color[256];
-
-            if(ramp == ColorRampEnum.GRAY_SCALE)
+            var pointCount = this._points.Count;
+            if (ramp == ColorRampEnum.GRAY_SCALE)
             {
-                for(int i = 0; i<256; i++)
+                for(int i = 0; i< pointCount; i++)
                 {
-                    res[i] = new Color(i, i, i);
+                    var comp = (int)(i * 256.0 / pointCount);
+                    this._points[i].Color = new Color(comp, comp, comp);
                 }
             }
             else if (ramp == ColorRampEnum.RAINBOW)
             {
-                for (int i = 0; i < 256; i++)
+                for (int i = 0; i < pointCount; i++)
                 {
-                    res[i] = Toolkit.FromHsl((float)i/256f,1f,0.5f);
-                    var d = res[i];
+                    this._points[i].Color = Toolkit.FromHsl(i / 20.0f, 1f, 0.5f);
+                }   
+            }
+            else if (ramp == ColorRampEnum.RANDOM)
+            {
+                for (int i = 0; i < pointCount; i++)
+                {
+                    this._points[i].Color = new Color(
+                        this._random.Next(0, 255),
+                        this._random.Next(0, 255),
+                        this._random.Next(0, 255)
+                    );
                 }
             }
-
-            return res;
         }
 
         /// <summary>
