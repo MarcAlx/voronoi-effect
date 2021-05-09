@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -15,6 +16,8 @@ namespace plasma_effect
 
         private Texture2D _voronoi;
         private VoronoiEngine _engine;
+
+        private List<VoronoiPoint> _points;
 
         private RandomMovingPoint _movingPoint;
 
@@ -33,6 +36,12 @@ namespace plasma_effect
 
             this._engine = new VoronoiEngine();
             this._movingPoint = new RandomMovingPoint();
+            this._points = new List<VoronoiPoint>
+            {
+                new VoronoiPoint { Point = new Point{ X = 0, Y = 0}, Color = Color.Blue },
+                new VoronoiPoint { Point = new Point{ X = GraphicsDevice.Viewport.Bounds.Width/2, Y = GraphicsDevice.Viewport.Bounds.Height/2}, Color = Color.LightBlue },
+                new VoronoiPoint { Point = new Point{ X = GraphicsDevice.Viewport.Bounds.Width, Y = GraphicsDevice.Viewport.Bounds.Height}, Color = Color.DarkBlue }
+            };
 
             base.Initialize();
         }
@@ -53,12 +62,7 @@ namespace plasma_effect
                 GraphicsDevice,
                 GraphicsDevice.Viewport.Bounds.Width,
                 GraphicsDevice.Viewport.Bounds.Height,
-                new System.Collections.Generic.List<VoronoiPoint>
-                {
-                    new VoronoiPoint { Point = new Point{ X = 0, Y = 0}, Color = Color.Blue },
-                    new VoronoiPoint { Point = new Point{ X = GraphicsDevice.Viewport.Bounds.Width/2, Y = GraphicsDevice.Viewport.Bounds.Height/2}, Color = Color.LightBlue },
-                    new VoronoiPoint { Point = new Point{ X = GraphicsDevice.Viewport.Bounds.Width, Y = GraphicsDevice.Viewport.Bounds.Height}, Color = Color.DarkBlue }
-                },
+                this._points,
                 ColorRampEnum.GRAY_SCALE,
                 Config.PIXEL_RATIO
             );
@@ -76,7 +80,17 @@ namespace plasma_effect
             //draw point
             if (Config.DRAW_POINTS)
             {
-                this._spriteBatch.Draw(this._movingPoint.GetTexture(this.GraphicsDevice), new Vector2(this._movingPoint.Position.X, this._movingPoint.Position.Y), Color.White);
+                foreach(var point in this._points)
+                {
+                    Texture2D rect = new Texture2D(GraphicsDevice, 3,3);
+                    Color[] data = new Color[9];
+                    for (var i = 0; i < data.Length; i++)
+                    {
+                        data[i] = Color.Black;
+                    }
+                    rect.SetData(data);
+                    this._spriteBatch.Draw(rect, new Vector2(point.Point.X-1, point.Point.Y-1), Color.White);
+                }
             }
 
             //draw fps
