@@ -22,6 +22,11 @@ namespace plasmaeffect.Engine
         RAINBOW,
 
         /// <summary>
+        /// Equally distributed blue scale
+        /// </summary>
+        OCEAN,
+
+        /// <summary>
         /// Random
         /// </summary>
         RANDOM
@@ -151,6 +156,23 @@ namespace plasmaeffect.Engine
                 {
                     this._points[i].Color = Toolkit.FromHsl(i / 20.0f, 1f, 0.5f);
                 }   
+            }
+            else if (ramp == ColorRampEnum.OCEAN)
+            {
+                int rMax = Color.White.R;
+                int rMin = Color.Blue.R;
+                int gMax = Color.White.G;
+                int gMin = Color.Blue.G;
+                int bMax = Color.White.B;
+                int bMin = Color.Blue.B;
+                var size = this._points.Count;
+                for (int i = 0; i < size; i++)
+                {
+                    var rAverage = rMin + (int)((rMax - rMin) * i / size);
+                    var gAverage = gMin + (int)((gMax - gMin) * i / size);
+                    var bAverage = bMin + (int)((bMax - bMin) * i / size);
+                    this._points[i].Color = new Color(rAverage, gAverage, bAverage);
+                }
             }
             else if (ramp == ColorRampEnum.RANDOM)
             {
